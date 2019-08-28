@@ -4,7 +4,7 @@
 #include "globals.h"
 
 bool moveGround = true;
-int groundX = 0;
+float groundX = 0;
 
 void pause() {
   // pause game with B button
@@ -21,19 +21,19 @@ void drawBackground() {
       
     }
   
-    groundX++;
+    groundX = groundX + 0.5;
     
-    for (uint8_t x = 0; x <= WIDTH; x++) {
-      for (uint8_t y = 0; y <= HEIGHT; y++) {
+    for (uint8_t x = 0; x < 5; x++) {
+      for (uint8_t y = 0; y < 2; y++) {
         Sprites::drawSelfMasked(x * tileSize - groundX,  y * tileSize, brainBg, 0);
       }
     }
     
-    for (uint8_t x = 0; x <= WIDTH; x++) {
+    for (uint8_t x = 0; x < 5; x++) {
       Sprites::drawSelfMasked(x * tileSize - groundX,  0, borderTop, 0);
     }
     
-    for (uint8_t x = 0; x <= WIDTH; x++) {
+    for (uint8_t x = 0; x < 5; x++) {
       Sprites::drawSelfMasked(x * tileSize - groundX,  HEIGHT - borderHeight, borderBottom, 0);
     }
       
@@ -45,27 +45,67 @@ void drawPlayer() {
   Sprites::drawSelfMasked(player.x, player.y, player.image, 0);
 }
 
+void updateObstacles() {
+  for (uint8_t i = 0; i < numberOfObstacles; i++) {
+    if (matters[i].enabled == true) {
+      matters[i].x--;
+      
+      // If obstacle goes off the left of screen, reset it
+      if (matters[i].x < -getImageWidth(matters[i].image)) {
+        matters[i].enabled = false;
+      }
+    }
+  }
+}
+
+/* -----------------------------------------------------------------------------------------------------------------------------
+ *  Render any visible obstacles on the screen ..
+ * -----------------------------------------------------------------------------------------------------------------------------
+ */
+void drawObstacles() {
+
+  for (uint8_t i = 0; i < numberOfObstacles; i++) {
+    
+    if (matters[i].enabled == true) {
+
+      Sprites::drawSelfMasked(matters[i].x, matters[i].y, matters[i].image, 0);      
+
+    }
+    
+  }
+  
+}
+
 void movePlayer() {
   
   // move left
   if (arduboy.pressed(LEFT_BUTTON) && player.x > 0) {
-    player.x = player.x - 3;
+    player.x--;
   }
   
   // move right
   if (arduboy.pressed(RIGHT_BUTTON) && player.x < 100) {
-    player.x = player.x + 3;
+    player.x++;
   }
   
   // move up
   if (arduboy.pressed(UP_BUTTON) && player.y > borderHeight) {
-    player.y = player.y - 3;
+    player.y--;
   }
   
   // move down
   if (arduboy.pressed(DOWN_BUTTON) && player.y < (bottomBorderLimit - playerSize)) {
-    player.y = player.y + 3;
+    player.y++;
   }
+}
+
+void launchObstacle(uint8_t obstacleNumber) {
+  
+  // launch obstacle
+  matters[obstacleNumber].x = WIDTH - 1;
+  matters[obstacleNumber].y = random(8, 50);
+  matters[obstacleNumber].size = Size::Small;
+  matters[obstacleNumber].enabled = true;
 }
 
 void drawTest() {
@@ -91,9 +131,40 @@ void introduction() {
 void playGame() {
   // include all gameplay functions in here
   drawBackground();
-  drawTest();
+  // drawTest();
   drawPlayer();
   movePlayer();
+  
+  // Begin obstacle process
+  uint16_t obstacleLaunchCountdown = obstacleLaunchDelayMin;
+  
+  // Should we launch another obstacle?
+  
+  // Isn't counting down for some reason...
+  --obstacleLaunchCountdown;
+  
+  arduboy.fillRect(0, 0, 32, 8, BLACK);
+  arduboy.setCursor(0, 0);
+  arduboy.print(obstacleLaunchCountdown);
+  
+  if (obstacleLaunchCountdown == 0) {
+
+    for (uint8_t i = 0; i < numberOfObstacles; i++) {
+
+      if (!matters[i].enabled) { 
+        launchObstacle(i); 
+        break;
+      }
+
+    }
+
+    obstacleLaunchCountdown = random(obstacleLaunchDelayMin, obstacleLaunchDelayMax);
+            
+  }
+  
+  updateObstacles();
+  drawObstacles();
+  
 }
 
 void gameOver() {

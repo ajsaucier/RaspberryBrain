@@ -7,6 +7,9 @@ constexpr uint8_t tileSize{ 32 };
 constexpr uint8_t borderHeight{ 8 };
 constexpr uint8_t bottomBorderLimit{ HEIGHT - borderHeight };
 constexpr uint8_t playerSize{ 16 };
+constexpr uint8_t numberOfObstacles{ 4 };
+constexpr uint8_t obstacleLaunchDelayMin{ 90 };
+constexpr uint16_t obstacleLaunchDelayMax{ 200 };
 
 enum class GameStatus : uint8_t {
   Introduction,
@@ -41,6 +44,14 @@ struct Matter {
   Size size;
   bool enabled;
   const uint8_t *image;
+};
+
+// create matter obstacles
+Matter matters[numberOfObstacles] = {
+  {0, 8, Size::Small, false, matterSmall},
+  {0, 8, Size::Small, false, matterSmall},
+  {0, 8, Size::Small, false, matterSmall},
+  {0, 8, Size::Small, false, matterSmall},
 };
 
 struct Synapse {
