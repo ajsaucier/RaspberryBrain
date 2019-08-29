@@ -9,7 +9,10 @@ constexpr uint8_t bottomBorderLimit{ HEIGHT - borderHeight };
 constexpr uint8_t playerSize{ 16 };
 constexpr uint8_t numberOfObstacles{ 4 };
 constexpr uint8_t obstacleLaunchDelayMin{ 90 };
-constexpr uint16_t obstacleLaunchDelayMax{ 200 };
+constexpr uint16_t obstacleLaunchDelayMax{ 100 };
+
+// Timer for launching obstacles
+uint16_t obstacleLaunchCountdown = obstacleLaunchDelayMin;
 
 enum class GameStatus : uint8_t {
   Introduction,
@@ -17,8 +20,8 @@ enum class GameStatus : uint8_t {
   GameOver,
 };
 
-// GameStatus gameStatus {GameStatus::Introduction}; // for production
-GameStatus gameStatus {GameStatus::PlayGame}; // for testing
+GameStatus gameStatus {GameStatus::Introduction}; // for production
+// GameStatus gameStatus {GameStatus::PlayGame}; // for testing
 
 enum class Size : uint8_t {
   Small,

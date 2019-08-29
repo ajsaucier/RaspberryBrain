@@ -41,6 +41,17 @@ void drawBackground() {
 
 }
 
+/* -----------------------------------------------------------------------------------------------------------------------------
+ *  Reset everything ready for a new game ..
+ * -----------------------------------------------------------------------------------------------------------------------------
+ */
+void initializeGame() {
+
+  for (uint8_t i = 0; i < numberOfObstacles; i++) {
+    matters[i].enabled = false;
+  }
+}
+
 void drawPlayer() {
   Sprites::drawSelfMasked(player.x, player.y, player.image, 0);
 }
@@ -68,10 +79,25 @@ void drawObstacles() {
     
     if (matters[i].enabled == true) {
 
-      Sprites::drawSelfMasked(matters[i].x, matters[i].y, matters[i].image, 0);      
+      if (matters[i].size == Size::Medium) {
+        matters[i].image = matterMedium;
+      } else {
+        matters[i].image = matterSmall;
+      }
+      
+      Sprites::drawOverwrite(matters[i].x, matters[i].y, matters[i].image, 0);      
 
     }
     
+  }
+  
+  arduboy.fillRect(0, 0, 32, 32, BLACK);
+  
+  for (uint8_t i = 0; i < numberOfObstacles; i++) {
+    arduboy.setCursor(0, i * 10);
+    arduboy.print(matters[i].enabled);
+    arduboy.print(", ");
+    arduboy.print(matters[i].x);
   }
   
 }
@@ -101,10 +127,16 @@ void movePlayer() {
 
 void launchObstacle(uint8_t obstacleNumber) {
   
+  // need to randomly choose between small or medium size
+  uint8_t randomLowerVal = static_cast<uint8_t>(Size::Small); // 0
+  uint8_t randomUpperVal = static_cast<uint8_t>(Size::Medium); // 1
+  uint8_t randomObstacle = random(randomLowerVal, randomUpperVal + 1);
+  Size size = static_cast<Size>(randomObstacle);
+  
   // launch obstacle
   matters[obstacleNumber].x = WIDTH - 1;
   matters[obstacleNumber].y = random(8, 50);
-  matters[obstacleNumber].size = Size::Small;
+  matters[obstacleNumber].size = size;
   matters[obstacleNumber].enabled = true;
 }
 
@@ -120,6 +152,9 @@ Game state functions
 ----------------------*/
 
 void introduction() {
+  
+  initializeGame();
+  
   arduboy.setCursor(0, 0);
   arduboy.print("Intro");
   // Show intro graphic on this screen, maybe instructions and sound on/off
@@ -129,6 +164,7 @@ void introduction() {
 }
 
 void playGame() {
+  
   // include all gameplay functions in here
   drawBackground();
   // drawTest();
@@ -136,16 +172,10 @@ void playGame() {
   movePlayer();
   
   // Begin obstacle process
-  uint16_t obstacleLaunchCountdown = obstacleLaunchDelayMin;
+  
   
   // Should we launch another obstacle?
-  
-  // Isn't counting down for some reason...
   --obstacleLaunchCountdown;
-  
-  arduboy.fillRect(0, 0, 32, 8, BLACK);
-  arduboy.setCursor(0, 0);
-  arduboy.print(obstacleLaunchCountdown);
   
   if (obstacleLaunchCountdown == 0) {
 
