@@ -11,7 +11,7 @@ void pause() {
 }
 
 void drawBackground() {
-  
+   
   // Check if ground should be moved
   if (moveGround) {
     
@@ -21,20 +21,21 @@ void drawBackground() {
       
     }
   
-    groundX = groundX + 0.5;
+    groundX++;
+    
+    // Background design might be too overwhelming
+    // for (uint8_t x = 0; x < 5; x++) {
+    //   for (uint8_t y = 0; y < 2; y++) {
+    //     Sprites::drawSelfMasked((x * tileSize) - groundX,  y * tileSize, brainBg, 0);
+    //   }
+    // }
     
     for (uint8_t x = 0; x < 5; x++) {
-      for (uint8_t y = 0; y < 2; y++) {
-        Sprites::drawSelfMasked(x * tileSize - groundX,  y * tileSize, brainBg, 0);
-      }
+      Sprites::drawSelfMasked((x * tileSize) - groundX,  0, borderTop, 0);
     }
     
     for (uint8_t x = 0; x < 5; x++) {
-      Sprites::drawSelfMasked(x * tileSize - groundX,  0, borderTop, 0);
-    }
-    
-    for (uint8_t x = 0; x < 5; x++) {
-      Sprites::drawSelfMasked(x * tileSize - groundX,  HEIGHT - borderHeight, borderBottom, 0);
+      Sprites::drawSelfMasked((x * tileSize) - groundX,  HEIGHT - borderHeight, borderBottom, 0);
     }
       
   }
@@ -50,12 +51,35 @@ void initializeGame() {
   for (uint8_t i = 0; i < numberOfObstacles; i++) {
     matters[i].enabled = false;
   }
+  
+  score = 0;
 }
 
 void drawPlayer() {
   Sprites::drawSelfMasked(player.x, player.y, player.image, 0);
 }
 
+void updateSynapses() {
+  for (uint8_t i = 0; i < numberOfSynapses; i++) {
+    if (targets[i].hit == false) {
+      targets[i].x--;
+      
+      // If synapse goes off the left of screen or gets clicked on, reset it
+      if (targets[i].x < -getImageWidth(targets[i].image) || targets[i].hit == true) {
+        targets[i].hit = false;
+      }
+    }
+  }
+}
+
+// Draw synapse, one on screen at a time
+void drawSynapses() {
+  for (uint8_t i = 0; i < numberOfSynapses; i++) {
+    Sprites::drawSelfMasked(targets[i].x, targets[i].y, targets[i].image, 0);
+  }
+}
+
+// Move obstacles until they go off screen, then reset them
 void updateObstacles() {
   for (uint8_t i = 0; i < numberOfObstacles; i++) {
     if (matters[i].enabled == true) {
@@ -85,22 +109,96 @@ void drawObstacles() {
         matters[i].image = matterSmall;
       }
       
-      Sprites::drawOverwrite(matters[i].x, matters[i].y, matters[i].image, 0);      
+      Sprites::drawSelfMasked(matters[i].x, matters[i].y, matters[i].image, 0);      
 
     }
     
   }
   
-  arduboy.fillRect(0, 0, 32, 32, BLACK);
+  // DEBUG
+  
+  /* arduboy.fillRect(0, 0, 32, 32, BLACK);
   
   for (uint8_t i = 0; i < numberOfObstacles; i++) {
     arduboy.setCursor(0, i * 10);
     arduboy.print(matters[i].enabled);
     arduboy.print(", ");
     arduboy.print(matters[i].x);
+    arduboy.print(", ");
+    arduboy.print(getImageWidth(matters[i].image));
   }
   
+  */
+  
 }
+
+/* -----------------------------------------------
+Detect collisions
+------------------------------------------------*/
+
+bool collision() { // Built-in method
+        
+  for (uint8_t i = 0; i < numberOfObstacles; i++) {
+
+    if (matters[i].enabled == true) {
+
+      Rect playerRect = Rect{ player.x, 
+                            player.y - getImageHeight(player.image),
+                            getImageWidth(player.image),
+                            getImageHeight(player.image) };
+      Rect obsRect =   Rect{ matters[i].x, 
+                            matters[i].y - getImageHeight(matters[i].image),
+                            getImageWidth(matters[i].image), 
+                            getImageHeight(matters[i].image) };
+
+      if (arduboy.collide(playerRect, obsRect)) {
+
+        return true;
+              
+      }
+          
+    }
+        
+  }
+
+  return false;
+
+}
+
+// Synapse collision
+
+bool collisionTarget() {
+  
+    for (uint8_t i = 0; i < numberOfSynapses; i++) {
+    
+    if (!targets[i].hit) {
+      
+      Rect playerRect = Rect{ player.x, 
+                            player.y - getImageHeight(player.image),
+                            getImageWidth(player.image),
+                            getImageHeight(player.image) };
+      Rect targetRect = Rect{ targets[i].x, 
+                            targets[i].y - getImageHeight(targets[i].image),
+                            getImageWidth(targets[i].image), 
+                            getImageHeight(targets[i].image) };
+
+      if (arduboy.collide(playerRect, targetRect)) {
+
+        return true;
+              
+      }
+      
+    }
+    
+  }
+  
+  return false;
+  
+}
+
+/* -----------------------------------------------
+Detect player input for raspberry movement
+------------------------------------------------*/
 
 void movePlayer() {
   
@@ -109,8 +207,8 @@ void movePlayer() {
     player.x--;
   }
   
-  // move right
-  if (arduboy.pressed(RIGHT_BUTTON) && player.x < 100) {
+  // move right if not hitting an obstacle
+  if (arduboy.pressed(RIGHT_BUTTON) && player.x < 100 && !collision()) {
     player.x++;
   }
   
@@ -125,6 +223,13 @@ void movePlayer() {
   }
 }
 
+void launchSynapse(uint8_t synapseNumber) {
+  // launch synapse target
+  targets[synapseNumber].x = WIDTH - 1;
+  targets[synapseNumber].y = random(0, 50);
+  targets[synapseNumber].hit = false;
+}
+
 void launchObstacle(uint8_t obstacleNumber) {
   
   // need to randomly choose between small or medium size
@@ -135,7 +240,7 @@ void launchObstacle(uint8_t obstacleNumber) {
   
   // launch obstacle
   matters[obstacleNumber].x = WIDTH - 1;
-  matters[obstacleNumber].y = random(8, 50);
+  matters[obstacleNumber].y = random(0, 50);
   matters[obstacleNumber].size = size;
   matters[obstacleNumber].enabled = true;
 }
@@ -173,8 +278,7 @@ void playGame() {
   
   // Begin obstacle process
   
-  
-  // Should we launch another obstacle?
+      // Should we launch another obstacle?
   --obstacleLaunchCountdown;
   
   if (obstacleLaunchCountdown == 0) {
@@ -192,8 +296,54 @@ void playGame() {
             
   }
   
+      // Should we launch another obstacle?
+  --synapseLaunchCountdown;
+  
+  if (synapseLaunchCountdown == 0) {
+  
+    // Launch a new synapse if player clicked on current one
+    for (uint8_t i = 0; i < numberOfSynapses; i++) {
+      if (!targets[i].hit) {
+        launchSynapse(i);
+        break;
+      }
+      
+    }
+    
+    synapseLaunchCountdown = random(synapseLaunchDelayMin, synapseLaunchDelayMax);
+    
+  }
+  
+  // Any collisions?
+  
+  arduboy.fillRect(0, 0, 16, 16, BLACK);
+
+  if (collision()) {
+    
+    arduboy.setCursor(0, 0);
+    arduboy.print("obstacle");
+    
+    // gameStatus = GameStatus::GameOver;
+    
+    if (player.x > 0) {
+      player.x--;
+    }
+
+  }
+  
+  if (collisionTarget()) {
+    
+    arduboy.setCursor(0, 16);
+    arduboy.print("synapse");
+  }
+  
   updateObstacles();
+  
   drawObstacles();
+  
+  updateSynapses();
+  
+  drawSynapses();
   
 }
 

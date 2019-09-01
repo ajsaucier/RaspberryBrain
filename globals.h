@@ -8,11 +8,26 @@ constexpr uint8_t borderHeight{ 8 };
 constexpr uint8_t bottomBorderLimit{ HEIGHT - borderHeight };
 constexpr uint8_t playerSize{ 16 };
 constexpr uint8_t numberOfObstacles{ 4 };
-constexpr uint8_t obstacleLaunchDelayMin{ 90 };
-constexpr uint16_t obstacleLaunchDelayMax{ 100 };
+constexpr uint16_t increaseDifficultyScore { 1000 };
+constexpr uint8_t numberOfSynapses{ 1 };
+
+// Scoring
+uint16_t score { 0 };
+uint16_t highScore { 0 };
+
+// Timing of random obstacle spawning
+uint8_t obstacleLaunchDelayMin{ 40 };
+uint16_t obstacleLaunchDelayMax{ 100 };
 
 // Timer for launching obstacles
 uint16_t obstacleLaunchCountdown = obstacleLaunchDelayMin;
+
+// Timing of synapse spawning
+uint8_t synapseLaunchDelayMin{ 60 };
+uint16_t synapseLaunchDelayMax{ 100 };
+
+// Timer for synapse targets
+uint16_t synapseLaunchCountdown = synapseLaunchDelayMin;
 
 enum class GameStatus : uint8_t {
   Introduction,
@@ -42,7 +57,7 @@ Raspberry player = {
 };
 
 struct Matter {
-  uint8_t x;
+  int8_t x;
   uint8_t y;
   Size size;
   bool enabled;
@@ -58,10 +73,14 @@ Matter matters[numberOfObstacles] = {
 };
 
 struct Synapse {
-  uint8_t x;
+  int8_t x;
   uint8_t y;
   bool hit;
   const uint8_t *image;
+};
+
+Synapse targets[numberOfSynapses] = {
+  {100, 25, false, synapse}
 };
 
 #endif
