@@ -143,15 +143,19 @@ bool collision() { // Built-in method
     if (matters[i].enabled == true) {
 
       Rect playerRect = Rect{ player.x, 
-                            player.y - getImageHeight(player.image),
+                            player.y,
                             getImageWidth(player.image),
                             getImageHeight(player.image) };
                             
+      // arduboy.drawRect(playerRect.x, playerRect.y, playerRect.width, playerRect.height );
+                            
                                     
       Rect obsRect =  Rect{ matters[i].x, 
-                        matters[i].y - getImageHeight(matters[i].image),
+                        matters[i].y,
                         getImageWidth(matters[i].image), 
                         getImageHeight(matters[i].image) };
+                        
+      // arduboy.drawRect(obsRect.x, obsRect.y, obsRect.width, obsRect.height );
                             
       if (matters[i].size == Size::Medium) {
         
@@ -187,11 +191,12 @@ bool collisionTarget() {
     if (!targets[i].hit) {
       
       Rect playerRect = Rect{ player.x, 
-                            player.y - getImageHeight(player.image),
+                            player.y,
                             getImageWidth(player.image),
                             getImageHeight(player.image) };
+                            
       Rect targetRect = Rect{ targets[i].x, 
-                            targets[i].y - getImageHeight(targets[i].image),
+                            targets[i].y,
                             getImageWidth(targets[i].image), 
                             getImageHeight(targets[i].image) };
 
