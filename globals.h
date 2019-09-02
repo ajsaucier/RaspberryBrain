@@ -16,15 +16,15 @@ uint16_t score { 0 };
 uint16_t highScore { 0 };
 
 // Timing of random obstacle spawning
-uint8_t obstacleLaunchDelayMin{ 40 };
-uint16_t obstacleLaunchDelayMax{ 100 };
+uint8_t obstacleLaunchDelayMin{ 30 };
+uint16_t obstacleLaunchDelayMax{ 90 };
 
 // Timer for launching obstacles
 uint16_t obstacleLaunchCountdown = obstacleLaunchDelayMin;
 
 // Timing of synapse spawning
-uint8_t synapseLaunchDelayMin{ 120 };
-uint16_t synapseLaunchDelayMax{ 120 };
+uint8_t synapseLaunchDelayMin{ 20 };
+uint16_t synapseLaunchDelayMax{ 20 };
 
 // Timer for synapse targets
 uint16_t synapseLaunchCountdown = synapseLaunchDelayMin;
@@ -58,7 +58,7 @@ Raspberry player = {
 
 struct Matter {
   int8_t x;
-  uint8_t y;
+  int8_t y;
   Size size;
   bool enabled;
   const uint8_t *image;
@@ -74,13 +74,14 @@ Matter matters[numberOfObstacles] = {
 
 struct Synapse {
   int8_t x;
-  uint8_t y;
+  int8_t y;
+  bool enabled;
   bool hit;
   const uint8_t *image;
 };
 
 Synapse targets[numberOfSynapses] = {
-  {100, 25, false, synapse}
+  {100, 25, false, false, synapse}
 };
 
 #endif

@@ -61,12 +61,12 @@ void drawPlayer() {
 
 void updateSynapses() {
   for (uint8_t i = 0; i < numberOfSynapses; i++) {
-    if (targets[i].hit == false) {
+    if (targets[i].enabled) {
       targets[i].x--;
       
       // If synapse goes off the left of screen or gets clicked on, reset it
-      if (targets[i].x < -getImageWidth(targets[i].image) || targets[i].hit == true) {
-        targets[i].hit = false;
+      if (targets[i].x < -getImageWidth(targets[i].image) || targets[i].hit) {
+        targets[i].enabled = false;
       }
     }
   }
@@ -74,15 +74,20 @@ void updateSynapses() {
 
 // Draw synapse, one on screen at a time
 void drawSynapses() {
+  
   for (uint8_t i = 0; i < numberOfSynapses; i++) {
-    Sprites::drawSelfMasked(targets[i].x, targets[i].y, targets[i].image, 0);
+    
+    if (targets[i].enabled) {
+      Sprites::drawSelfMasked(targets[i].x, targets[i].y, targets[i].image, 0);
+    }
+
   }
 }
 
 // Move obstacles until they go off screen, then reset them
 void updateObstacles() {
   for (uint8_t i = 0; i < numberOfObstacles; i++) {
-    if (matters[i].enabled == true) {
+    if (matters[i].enabled) {
       matters[i].x--;
       
       // If obstacle goes off the left of screen, reset it
@@ -101,7 +106,7 @@ void drawObstacles() {
 
   for (uint8_t i = 0; i < numberOfObstacles; i++) {
     
-    if (matters[i].enabled == true) {
+    if (matters[i].enabled) {
 
       if (matters[i].size == Size::Medium) {
         matters[i].image = matterMedium;
@@ -140,7 +145,7 @@ bool collision() { // Built-in method
         
   for (uint8_t i = 0; i < numberOfObstacles; i++) {
 
-    if (matters[i].enabled == true) {
+    if (matters[i].enabled) {
 
       Rect playerRect = Rect{ player.x, 
                             player.y,
@@ -162,9 +167,9 @@ bool collision() { // Built-in method
         arduboy.setCursor(50, 0);
         arduboy.print(F("medium"));
         arduboy.print("\n");
-        arduboy.print(getImageWidth(matters[i].image));
+        arduboy.print(matters[i].x);
         arduboy.print(F(", "));
-        arduboy.print(getImageHeight(matters[i].image));
+        arduboy.print(matters[i].y);
         
       }
 
@@ -188,7 +193,7 @@ bool collisionTarget() {
   
     for (uint8_t i = 0; i < numberOfSynapses; i++) {
     
-    if (!targets[i].hit) {
+    if (targets[i].enabled) {
       
       Rect playerRect = Rect{ player.x, 
                             player.y,
@@ -242,9 +247,11 @@ void movePlayer() {
 }
 
 void launchSynapse(uint8_t synapseNumber) {
+  
   // launch synapse target
   targets[synapseNumber].x = WIDTH - 1;
   targets[synapseNumber].y = random(8, 48);
+  targets[synapseNumber].enabled = true;
   targets[synapseNumber].hit = false;
 }
 
@@ -261,6 +268,7 @@ void launchObstacle(uint8_t obstacleNumber) {
   matters[obstacleNumber].y = random(0, 50);
   matters[obstacleNumber].size = size;
   matters[obstacleNumber].enabled = true;
+
 }
 
 void drawTest() {
@@ -296,7 +304,7 @@ void playGame() {
   
   // Begin obstacle process
   
-      // Should we launch another obstacle?
+  // Should we launch another obstacle?
   --obstacleLaunchCountdown;
   
   if (obstacleLaunchCountdown == 0) {
@@ -304,8 +312,11 @@ void playGame() {
     for (uint8_t i = 0; i < numberOfObstacles; i++) {
 
       if (!matters[i].enabled) { 
-        launchObstacle(i); 
+        
+        launchObstacle(i);
+        
         break;
+        
       }
 
     }
@@ -321,14 +332,18 @@ void playGame() {
   
     // Launch a new synapse if player clicked on current one
     for (uint8_t i = 0; i < numberOfSynapses; i++) {
-      if (!targets[i].hit) {
-        launchSynapse(i);
+      
+      if (!targets[i].enabled) {
+        
+          launchSynapse(i);
+        
         break;
+        
       }
       
     }
     
-    synapseLaunchCountdown = random(synapseLaunchDelayMin, synapseLaunchDelayMax);
+    synapseLaunchCountdown = random(synapseLaunchDelayMin, synapseLaunchDelayMax) + obstacleLaunchCountdown;
     
   }
   
@@ -349,8 +364,8 @@ void playGame() {
   
   if (collisionTarget()) {
     
-    arduboy.setCursor(0, 16);
-    arduboy.print(F("synapse"));
+    // arduboy.setCursor(0, 16);
+    // arduboy.print(F("synapse"));
   }
   
   updateObstacles();
