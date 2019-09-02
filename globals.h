@@ -23,8 +23,8 @@ uint16_t obstacleLaunchDelayMax{ 100 };
 uint16_t obstacleLaunchCountdown = obstacleLaunchDelayMin;
 
 // Timing of synapse spawning
-uint8_t synapseLaunchDelayMin{ 60 };
-uint16_t synapseLaunchDelayMax{ 100 };
+uint8_t synapseLaunchDelayMin{ 120 };
+uint16_t synapseLaunchDelayMax{ 120 };
 
 // Timer for synapse targets
 uint16_t synapseLaunchCountdown = synapseLaunchDelayMin;

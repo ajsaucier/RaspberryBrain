@@ -146,10 +146,23 @@ bool collision() { // Built-in method
                             player.y - getImageHeight(player.image),
                             getImageWidth(player.image),
                             getImageHeight(player.image) };
-      Rect obsRect =   Rect{ matters[i].x, 
-                            matters[i].y - getImageHeight(matters[i].image),
-                            getImageWidth(matters[i].image), 
-                            getImageHeight(matters[i].image) };
+                            
+                                    
+      Rect obsRect =  Rect{ matters[i].x, 
+                        matters[i].y - getImageHeight(matters[i].image),
+                        getImageWidth(matters[i].image), 
+                        getImageHeight(matters[i].image) };
+                            
+      if (matters[i].size == Size::Medium) {
+        
+        arduboy.setCursor(50, 0);
+        arduboy.print(F("medium"));
+        arduboy.print("\n");
+        arduboy.print(getImageWidth(matters[i].image));
+        arduboy.print(F(", "));
+        arduboy.print(getImageHeight(matters[i].image));
+        
+      }
 
       if (arduboy.collide(playerRect, obsRect)) {
 
@@ -226,7 +239,7 @@ void movePlayer() {
 void launchSynapse(uint8_t synapseNumber) {
   // launch synapse target
   targets[synapseNumber].x = WIDTH - 1;
-  targets[synapseNumber].y = random(0, 50);
+  targets[synapseNumber].y = random(8, 48);
   targets[synapseNumber].hit = false;
 }
 
@@ -261,7 +274,7 @@ void introduction() {
   initializeGame();
   
   arduboy.setCursor(0, 0);
-  arduboy.print("Intro");
+  arduboy.print(F("Intro"));
   // Show intro graphic on this screen, maybe instructions and sound on/off
   if (arduboy.justPressed(A_BUTTON)) {
     gameStatus = GameStatus::PlayGame;
@@ -315,13 +328,11 @@ void playGame() {
   }
   
   // Any collisions?
-  
-  arduboy.fillRect(0, 0, 16, 16, BLACK);
 
   if (collision()) {
     
     arduboy.setCursor(0, 0);
-    arduboy.print("obstacle");
+    arduboy.print(F("obstacle"));
     
     // gameStatus = GameStatus::GameOver;
     
@@ -334,7 +345,7 @@ void playGame() {
   if (collisionTarget()) {
     
     arduboy.setCursor(0, 16);
-    arduboy.print("synapse");
+    arduboy.print(F("synapse"));
   }
   
   updateObstacles();
@@ -349,7 +360,7 @@ void playGame() {
 
 void gameOver() {
   arduboy.setCursor(0, 0);
-  arduboy.print("Over");
+  arduboy.print(F("Over"));
   // Show current score and high score on this screen
 }
 
