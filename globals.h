@@ -10,6 +10,7 @@ constexpr uint8_t playerSize{ 16 };
 constexpr uint8_t numberOfObstacles{ 4 };
 constexpr uint16_t increaseDifficultyScore { 1000 };
 constexpr uint8_t numberOfSynapses{ 1 };
+constexpr uint8_t synapseSize{ 8 };
 
 // Scoring
 uint16_t score { 0 };
@@ -17,7 +18,7 @@ uint16_t highScore { 0 };
 
 // Timing of random obstacle spawning
 uint8_t obstacleLaunchDelayMin{ 30 };
-uint16_t obstacleLaunchDelayMax{ 90 };
+uint16_t obstacleLaunchDelayMax{ 70 };
 
 // Timer for launching obstacles
 uint16_t obstacleLaunchCountdown = obstacleLaunchDelayMin;
@@ -28,6 +29,14 @@ uint16_t synapseLaunchDelayMax{ 20 };
 
 // Timer for synapse targets
 uint16_t synapseLaunchCountdown = synapseLaunchDelayMin;
+
+// Timer to delay first spawn
+uint8_t launchTimer{ 100 };
+
+// Lookup table for spawning medium obstacles
+int spawnCoords[16] = {
+  8, 9, 10, 11, 12, 13, 14, 32, 33, 34, 35, 36, 37, 38, 39, 40
+};
 
 enum class GameStatus : uint8_t {
   Introduction,
@@ -81,7 +90,7 @@ struct Synapse {
 };
 
 Synapse targets[numberOfSynapses] = {
-  {100, 25, false, false, synapse}
+  {100, (HEIGHT / 2) - (synapseSize / 2), false, false, synapse}
 };
 
 #endif

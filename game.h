@@ -52,7 +52,12 @@ void initializeGame() {
     matters[i].enabled = false;
   }
   
+  for (uint8_t i = 0; i < numberOfSynapses; i++) {
+    targets[i].enabled = false;
+  }
+  
   score = 0;
+  launchTimer = 75;
 }
 
 void drawPlayer() {
@@ -80,7 +85,6 @@ void drawSynapses() {
     if (targets[i].enabled) {
       Sprites::drawSelfMasked(targets[i].x, targets[i].y, targets[i].image, 0);
     }
-
   }
 }
 
@@ -147,31 +151,26 @@ bool collision() { // Built-in method
 
     if (matters[i].enabled) {
 
-      Rect playerRect = Rect{ player.x, 
-                            player.y,
-                            getImageWidth(player.image),
-                            getImageHeight(player.image) };
+      Rect playerRect 
+      {
+        player.x, 
+        player.y,
+        getImageWidth(player.image),
+        getImageHeight(player.image) 
+      };
                             
       // arduboy.drawRect(playerRect.x, playerRect.y, playerRect.width, playerRect.height );
                             
                                     
-      Rect obsRect =  Rect{ matters[i].x, 
-                        matters[i].y,
-                        getImageWidth(matters[i].image), 
-                        getImageHeight(matters[i].image) };
+      Rect obsRect
+      { 
+        matters[i].x, 
+        matters[i].y,
+        getImageWidth(matters[i].image), 
+        getImageHeight(matters[i].image) 
+      };
                         
       // arduboy.drawRect(obsRect.x, obsRect.y, obsRect.width, obsRect.height );
-                            
-      if (matters[i].size == Size::Medium) {
-        
-        arduboy.setCursor(50, 0);
-        arduboy.print(F("medium"));
-        arduboy.print("\n");
-        arduboy.print(matters[i].x);
-        arduboy.print(F(", "));
-        arduboy.print(matters[i].y);
-        
-      }
 
       if (arduboy.collide(playerRect, obsRect)) {
 
@@ -195,15 +194,21 @@ bool collisionTarget() {
     
     if (targets[i].enabled) {
       
-      Rect playerRect = Rect{ player.x, 
-                            player.y,
-                            getImageWidth(player.image),
-                            getImageHeight(player.image) };
+      Rect playerRect
+      { 
+        player.x, 
+        player.y,
+        getImageWidth(player.image),
+        getImageHeight(player.image) 
+      };
                             
-      Rect targetRect = Rect{ targets[i].x, 
-                            targets[i].y,
-                            getImageWidth(targets[i].image), 
-                            getImageHeight(targets[i].image) };
+      Rect targetRect 
+      { 
+        targets[i].x, 
+        targets[i].y,
+        getImageWidth(targets[i].image), 
+        getImageHeight(targets[i].image) 
+      };
 
       if (arduboy.collide(playerRect, targetRect)) {
 
@@ -219,6 +224,20 @@ bool collisionTarget() {
   
 }
 
+void detectHit() {
+  
+  for (uint8_t i = 0; i < numberOfSynapses; i++) {
+  
+    if (collisionTarget() && arduboy.justPressed(A_BUTTON)) {
+    
+      targets[i].hit = true;
+      
+      arduboy.fillRect(0, 0, WIDTH, HEIGHT, WHITE);
+      
+    }
+  }
+}
+
 /* -----------------------------------------------
 Detect player input for raspberry movement
 ------------------------------------------------*/
@@ -226,7 +245,7 @@ Detect player input for raspberry movement
 void movePlayer() {
   
   // move left
-  if (arduboy.pressed(LEFT_BUTTON) && player.x > 0) {
+  if (arduboy.pressed(LEFT_BUTTON) && player.x > 0 && !collision()) {
     player.x--;
   }
   
@@ -263,19 +282,15 @@ void launchObstacle(uint8_t obstacleNumber) {
   uint8_t randomObstacle = random(randomLowerVal, randomUpperVal + 1);
   Size size = static_cast<Size>(randomObstacle);
   
+  // random number from spawnCoords[] lookup table
+  int index = rand() % (sizeof spawnCoords / sizeof *spawnCoords);
+  
   // launch obstacle
   matters[obstacleNumber].x = WIDTH - 1;
-  matters[obstacleNumber].y = random(0, 50);
+  matters[obstacleNumber].y = spawnCoords[index];
   matters[obstacleNumber].size = size;
   matters[obstacleNumber].enabled = true;
 
-}
-
-void drawTest() {
-  Sprites::drawSelfMasked(50, 42, synapse, 0);
-  Sprites::drawSelfMasked(50, 8, matterSmall, 0);
-  Sprites::drawSelfMasked(60, 8, matterMedium, 0);
-  Sprites::drawSelfMasked(70, 8, matterLarge, 0);
 }
 
 /* --------------------
@@ -298,74 +313,80 @@ void playGame() {
   
   // include all gameplay functions in here
   drawBackground();
-  // drawTest();
   drawPlayer();
   movePlayer();
   
-  // Begin obstacle process
-  
-  // Should we launch another obstacle?
-  --obstacleLaunchCountdown;
-  
-  if (obstacleLaunchCountdown == 0) {
+  /*--------------------------------------
+  Begin obstacle process
+  --------------------------------------*/
 
-    for (uint8_t i = 0; i < numberOfObstacles; i++) {
-
-      if (!matters[i].enabled) { 
-        
-        launchObstacle(i);
-        
-        break;
-        
-      }
-
-    }
-
-    obstacleLaunchCountdown = random(obstacleLaunchDelayMin, obstacleLaunchDelayMax);
-            
+  // Don't launch anything until timer is up.
+  // This is here so the player isn't caught off guard immediately
+  for (uint8_t i = 0; i < launchTimer; i--) {
+    --launchTimer;
   }
   
+  if (launchTimer == 0) {
+    
       // Should we launch another obstacle?
-  --synapseLaunchCountdown;
+    --obstacleLaunchCountdown;
+    
+    if (obstacleLaunchCountdown == 0) {
   
-  if (synapseLaunchCountdown == 0) {
+      for (uint8_t i = 0; i < numberOfObstacles; i++) {
   
-    // Launch a new synapse if player clicked on current one
-    for (uint8_t i = 0; i < numberOfSynapses; i++) {
-      
-      if (!targets[i].enabled) {
+        if (!matters[i].enabled) { 
+          
+          launchObstacle(i);
+          
+          break;
+          
+        }
+  
+      }
+  
+      obstacleLaunchCountdown = random(obstacleLaunchDelayMin, obstacleLaunchDelayMax);
+              
+    }
+    
+    // Should we launch another target (synapse)?
+    --synapseLaunchCountdown;
+    
+    if (synapseLaunchCountdown == 0) {
+    
+      // Launch a new synapse if player clicked on current one
+      for (uint8_t i = 0; i < numberOfSynapses; i++) {
         
+        if (!targets[i].enabled) {
+          
           launchSynapse(i);
-        
-        break;
+          
+          break;
+          
+        }
         
       }
       
+      synapseLaunchCountdown = random(synapseLaunchDelayMin, synapseLaunchDelayMax) + obstacleLaunchCountdown;
+      
     }
-    
-    synapseLaunchCountdown = random(synapseLaunchDelayMin, synapseLaunchDelayMax) + obstacleLaunchCountdown;
-    
   }
   
   // Any collisions?
 
   if (collision()) {
     
-    arduboy.setCursor(0, 0);
-    arduboy.print(F("obstacle"));
+    // arduboy.setCursor(0, 0);
+    // arduboy.print(F("obstacle"));
     
     // gameStatus = GameStatus::GameOver;
     
     if (player.x > 0) {
       player.x--;
+    } else {
+      gameStatus = GameStatus::GameOver;
     }
 
-  }
-  
-  if (collisionTarget()) {
-    
-    // arduboy.setCursor(0, 16);
-    // arduboy.print(F("synapse"));
   }
   
   updateObstacles();
@@ -376,12 +397,18 @@ void playGame() {
   
   drawSynapses();
   
+  detectHit();
+  
 }
 
 void gameOver() {
   arduboy.setCursor(0, 0);
   arduboy.print(F("Over"));
   // Show current score and high score on this screen
+  
+  if (arduboy.justPressed(A_BUTTON)) {
+    gameStatus = GameStatus::Introduction;
+  }
 }
 
 #endif
