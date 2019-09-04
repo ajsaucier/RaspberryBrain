@@ -2,6 +2,8 @@
 #define GLOBAL_H
 
 Arduboy2 arduboy;
+#include <ArduboyTones.h>
+ArduboyTones sound(arduboy.audio.enabled);
 
 constexpr uint8_t tileSize{ 32 };
 constexpr uint8_t borderHeight{ 8 };
@@ -59,11 +61,7 @@ struct Raspberry {
 };
 
 // create player
-Raspberry player = {
-  0,
-  (HEIGHT / 2) - (playerSize / 2),
-  raspberry
-};
+Raspberry player = {0, (HEIGHT / 2) - (playerSize / 2), raspberry};
 
 struct Matter {
   int8_t x;

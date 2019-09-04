@@ -56,6 +56,10 @@ void initializeGame() {
     targets[i].enabled = false;
   }
   
+  player.x = 0;
+  player.y = (HEIGHT / 2) - (playerSize / 2);
+  player.image = raspberry;
+  
   score = 0;
   launchTimer = 75;
 }
@@ -72,6 +76,10 @@ void updateSynapses() {
       // If synapse goes off the left of screen or gets clicked on, reset it
       if (targets[i].x < -getImageWidth(targets[i].image) || targets[i].hit) {
         targets[i].enabled = false;
+      }
+      
+      if(targets[i].x < -getImageWidth(targets[i].image) && !targets[i].hit) {
+        gameStatus = GameStatus::GameOver;
       }
     }
   }
@@ -232,7 +240,13 @@ void detectHit() {
     
       targets[i].hit = true;
       
-      arduboy.fillRect(0, 0, WIDTH, HEIGHT, WHITE);
+      arduboy.fillScreen(WHITE);
+      
+      if (arduboy.audio.enabled()) {
+        
+        sound.tone(NOTE_E5, 50);
+        
+      }
       
     }
   }
@@ -403,7 +417,19 @@ void playGame() {
 
 void gameOver() {
   arduboy.setCursor(0, 0);
-  arduboy.print(F("Over"));
+  arduboy.print(F("Sorry, you got stuck"));
+  arduboy.print(F("\n"));
+  arduboy.print(F("on some brain matter!"));
+  
+  arduboy.setCursor(0, 30);
+  arduboy.print(F("SCORE: "));
+  
+  arduboy.setCursor(0, 40);
+  arduboy.print(F("HI SCORE: "));
+  
+  arduboy.setCursor(0, 50);
+  arduboy.print(F("Press A to start over."));
+  
   // Show current score and high score on this screen
   
   if (arduboy.justPressed(A_BUTTON)) {

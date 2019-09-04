@@ -5,7 +5,12 @@
 #include "game.h"
 
 void setup() {
-  arduboy.boot();
+  
+  arduboy.begin();
+  // for quicker booting when developing
+  // arduboy.boot();
+  // arduboy.flashlight();
+  
   arduboy.setFrameRate(60);
 
   // initialize things here
