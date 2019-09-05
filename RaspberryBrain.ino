@@ -1,5 +1,6 @@
 // See: https://mlxxxp.github.io/documents/Arduino/libraries/Arduboy2/Doxygen/html/
 #include <Arduboy2.h>
+#include <EEPROM.h>
 #include "Images.h"
 #include "globals.h"
 #include "game.h"

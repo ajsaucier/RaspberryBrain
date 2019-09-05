@@ -22,6 +22,19 @@ void toggleSoundSettings() {
   }
 }
 
+// Add ability to toggle screen flash when synapse is hit
+void toggleScreenFlash() {
+  
+  if (shouldScreenFlash) {
+    shouldScreenFlash = false;
+    EEPROM.put(EEPROM_STORAGE_SPACE_START, shouldScreenFlash);
+  } else {
+    shouldScreenFlash = true;
+    EEPROM.put(EEPROM_STORAGE_SPACE_START, shouldScreenFlash);
+  }
+  
+}
+
 void drawBackground() {
    
   // Check if ground should be moved
@@ -74,6 +87,8 @@ void initializeGame() {
   
   score = 0;
   launchTimer = 75;
+  
+  shouldScreenFlash = EEPROM.get(EEPROM_STORAGE_SPACE_START, shouldScreenFlash);
 }
 
 void drawPlayer() {
@@ -252,7 +267,9 @@ void detectHit() {
     
       targets[i].hit = true;
       
-      arduboy.fillScreen(WHITE);
+      if (shouldScreenFlash) {
+        arduboy.fillScreen(WHITE);
+      }
       
       if (arduboy.audio.enabled()) {
         
@@ -339,6 +356,14 @@ void introduction() {
   
   // TODO: Add option to toggle screen flash using arrow key
   
+  Sprites::drawOverwrite(83, 53, (shouldScreenFlash ? sound_on : sound_off), 0);
+  
+  if (arduboy.justPressed(RIGHT_BUTTON)) {
+    
+    toggleScreenFlash();
+    Sprites::drawOverwrite(83, 53, (shouldScreenFlash ? sound_on : sound_off), 0);
+    
+  }
   
   if (arduboy.justPressed(A_BUTTON)) {
     gameStatus = GameStatus::PlayGame;
@@ -421,12 +446,13 @@ void playGame() {
     // arduboy.print(F("obstacle"));
     
     // gameStatus = GameStatus::GameOver;
-    
-    if (player.x > 0) {
-      player.x--;
-    } else {
-      gameStatus = GameStatus::GameOver;
-    }
+      
+      if (player.x > 0) {
+        player.x--;
+      } else {
+        gameStatus = GameStatus::GameOver;
+      }
+
 
   }
   

@@ -35,6 +35,9 @@ uint16_t synapseLaunchCountdown = synapseLaunchDelayMin;
 // Timer to delay first spawn
 uint8_t launchTimer{ 100 };
 
+// Turning screen flashing on or off
+bool shouldScreenFlash{ true };
+
 // Lookup table for spawning medium obstacles
 int spawnCoords[16] = {
   8, 9, 10, 11, 12, 13, 14, 32, 33, 34, 35, 36, 37, 38, 39, 40
