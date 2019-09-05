@@ -10,6 +10,18 @@ void pause() {
   // pause game with B button
 }
 
+// Add ability to turn on or off beep sounds
+void toggleSoundSettings() {
+  
+  if (arduboy.audio.enabled()) {
+    arduboy.audio.off();
+    arduboy.audio.saveOnOff();
+  } else {
+    arduboy.audio.on();
+    arduboy.audio.saveOnOff();
+  }
+}
+
 void drawBackground() {
    
   // Check if ground should be moved
@@ -315,9 +327,17 @@ void introduction() {
   
   initializeGame();
   
-  arduboy.setCursor(0, 0);
-  arduboy.print(F("Intro"));
-  // Show intro graphic on this screen, maybe instructions and sound on/off
+  Sprites::drawOverwrite(0, 0, intro, 0);
+  
+  Sprites::drawOverwrite(95, 43, (arduboy.audio.enabled() ? sound_on : sound_off), 0);
+  
+  if (arduboy.justPressed(B_BUTTON)) {
+    
+    toggleSoundSettings();
+    Sprites::drawOverwrite(95, 43, (arduboy.audio.enabled() ? sound_on : sound_off), 0);
+  }
+  
+  // Show intro graphic on this screen
   if (arduboy.justPressed(A_BUTTON)) {
     gameStatus = GameStatus::PlayGame;
   }
