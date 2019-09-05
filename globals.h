@@ -42,6 +42,7 @@ int spawnCoords[16] = {
 
 enum class GameStatus : uint8_t {
   Introduction,
+  Instructions,
   PlayGame,
   GameOver,
 };

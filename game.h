@@ -337,10 +337,17 @@ void introduction() {
     Sprites::drawOverwrite(95, 43, (arduboy.audio.enabled() ? sound_on : sound_off), 0);
   }
   
-  // Show intro graphic on this screen
+  // TODO: Add option to toggle screen flash using arrow key
+  
+  
   if (arduboy.justPressed(A_BUTTON)) {
     gameStatus = GameStatus::PlayGame;
   }
+}
+
+void instructions() {
+  
+  // TODO: Add instructions explaining game
 }
 
 void playGame() {
