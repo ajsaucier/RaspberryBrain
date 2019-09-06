@@ -1,25 +1,17 @@
 #ifndef IMAGES_H
 #define IMAGES_H
 
-/* -----------------------------------------------------------------------------------------------------------------------------
- *  Retrieve the width of an image.
- * -----------------------------------------------------------------------------------------------------------------------------
- */
-unsigned char getImageWidth(const byte *image) {
-  
-  return pgm_read_byte(image);
-  
+// Retrieve the width of a Sprites-format image.
+uint8_t getImageWidth(const uint8_t * image)
+{
+  return pgm_read_byte(&image[0]);
 }
   
   
-/* -----------------------------------------------------------------------------------------------------------------------------
- *  Retrieve the height of an image.
- * -----------------------------------------------------------------------------------------------------------------------------
- */
- unsigned char getImageHeight(const byte *image) {
-
-  return pgm_read_byte(image + 1);
-
+// Retrieve the height of a Sprites-format image.
+uint8_t getImageHeight(const uint8_t * image)
+{
+  return pgm_read_byte(&image[1]);
 }
 
 // Introduction page

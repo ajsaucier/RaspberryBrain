@@ -25,6 +25,14 @@ bool isPaused{ false };
 uint16_t score { 0 };
 uint16_t highScore { 0 };
 
+// Set everything being saved to EEPROM
+// struct SaveData {
+//   bool shouldScreenFlash;
+//   uint16_t highScore;
+// };
+
+// SavaData saveData = {true, 0}; 
+
 // Timing of random obstacle spawning
 uint8_t obstacleLaunchDelayMin{ 30 };
 uint16_t obstacleLaunchDelayMax{ 70 };

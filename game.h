@@ -8,11 +8,10 @@ void toggleSoundSettings() {
   
   if (arduboy.audio.enabled()) {
     arduboy.audio.off();
-    arduboy.audio.saveOnOff();
   } else {
     arduboy.audio.on();
-    arduboy.audio.saveOnOff();
   }
+  arduboy.audio.saveOnOff();
 }
 
 // Add ability to toggle screen flash when synapse is hit
@@ -20,12 +19,10 @@ void toggleScreenFlash() {
   
   if (shouldScreenFlash) {
     shouldScreenFlash = false;
-    EEPROM.put(EEPROM_STORAGE_SPACE_START, shouldScreenFlash);
   } else {
     shouldScreenFlash = true;
-    EEPROM.put(EEPROM_STORAGE_SPACE_START, shouldScreenFlash);
   }
-  
+  EEPROM.put(EEPROM_STORAGE_SPACE_START, shouldScreenFlash);
 }
 
 void drawBackground() {
@@ -36,7 +33,6 @@ void drawBackground() {
     // If the ground has moved one entire tile, add new tiles to the end
     if (groundX == 32) {
       groundX = 0;
-      
     }
   
     groundX++;
@@ -60,10 +56,9 @@ void drawBackground() {
 
 }
 
-/* -----------------------------------------------------------------------------------------------------------------------------
- *  Reset everything ready for a new game ..
- * -----------------------------------------------------------------------------------------------------------------------------
- */
+// 
+// Reset everything for a new game
+// 
 void initializeGame() {
 
   for (uint8_t i = 0; i < numberOfObstacles; i++) {
@@ -84,6 +79,17 @@ void initializeGame() {
   
   shouldScreenFlash = EEPROM.get(EEPROM_STORAGE_SPACE_START, shouldScreenFlash);
   // highScore = EEPROM.get(EEPROM_STORAGE_SPACE_START, highScore);
+}
+
+void printInstructions() {
+  arduboy.setCursor(30, 10);
+  arduboy.print(F("Avoid sticky"));
+  arduboy.setCursor(30, 20);
+  arduboy.print(F("brain matter"));
+  arduboy.setCursor(30, 30);
+  arduboy.print(F("and press A when"));
+  arduboy.setCursor(30, 40);
+  arduboy.print(F("near synapses!"));
 }
 
 void drawPlayer() {
@@ -111,7 +117,6 @@ void updateSynapses() {
 void drawSynapses() {
   
   for (uint8_t i = 0; i < numberOfSynapses; i++) {
-    
     if (targets[i].enabled) {
       Sprites::drawSelfMasked(targets[i].x, targets[i].y, targets[i].image, 0);
     }
@@ -132,20 +137,15 @@ void updateObstacles() {
   }
 }
 
-/* -----------------------------------------------------------------------------------------------------------------------------
- *  Render any visible obstacles on the screen ..
- * -----------------------------------------------------------------------------------------------------------------------------
- */
+// 
+// Render enabled obstacles on the screen
+// 
 void drawObstacles() {
 
   for (uint8_t i = 0; i < numberOfObstacles; i++) {
-    
     if (matters[i].enabled) {
-      
       Sprites::drawSelfMasked(matters[i].x, matters[i].y, matters[i].image, 0);      
-
     }
-    
   }
   
   // DEBUG
@@ -165,11 +165,11 @@ void drawObstacles() {
   
 }
 
-/* -----------------------------------------------
-Detect collisions
-------------------------------------------------*/
+// 
+// Detect all collisions
+// 
 
-bool collision() { // Built-in method
+bool collisionObstacle() { // Built-in method
         
   for (uint8_t i = 0; i < numberOfObstacles; i++) {
 
@@ -197,24 +197,18 @@ bool collision() { // Built-in method
       // arduboy.drawRect(obsRect.x, obsRect.y, obsRect.width, obsRect.height );
 
       if (arduboy.collide(playerRect, obsRect)) {
-
         return true;
-              
       }
-          
     }
-        
   }
-
   return false;
-
 }
 
 // Synapse collision
 
 bool collisionTarget() {
   
-    for (uint8_t i = 0; i < numberOfSynapses; i++) {
+  for (uint8_t i = 0; i < numberOfSynapses; i++) {
     
     if (targets[i].enabled) {
       
@@ -235,25 +229,17 @@ bool collisionTarget() {
       };
 
       if (arduboy.collide(playerRect, targetRect)) {
-
         return true;
-              
       }
-      
     }
-    
   }
-  
   return false;
-  
 }
 
 void detectHit() {
   
   for (uint8_t i = 0; i < numberOfSynapses; i++) {
-  
     if (collisionTarget() && arduboy.justPressed(A_BUTTON)) {
-    
       targets[i].hit = true;
       
       if (shouldScreenFlash) {
@@ -261,30 +247,26 @@ void detectHit() {
       }
       
       if (arduboy.audio.enabled()) {
-        
         sound.tone(NOTE_E5, 50);
-        
       }
-      
       score += 10;
-      
     }
   }
 }
 
-/* -----------------------------------------------
-Detect player input for raspberry movement
-------------------------------------------------*/
+// 
+// Detect player input for raspberry movement
+// 
 
 void movePlayer() {
   
   // move left
-  if (arduboy.pressed(LEFT_BUTTON) && player.x > 0 && !collision()) {
+  if (arduboy.pressed(LEFT_BUTTON) && player.x > 0 && !collisionObstacle()) {
     player.x--;
   }
   
   // move right if not hitting an obstacle
-  if (arduboy.pressed(RIGHT_BUTTON) && player.x < 100 && !collision()) {
+  if (arduboy.pressed(RIGHT_BUTTON) && player.x < 100 && !collisionObstacle()) {
     player.x++;
   }
   
@@ -333,9 +315,9 @@ void launchObstacle(uint8_t obstacleNumber) {
 
 }
 
-/* --------------------
-Game state functions
-----------------------*/
+// 
+// Functions for game states
+// 
 
 void introduction() {
   
@@ -346,7 +328,6 @@ void introduction() {
   Sprites::drawOverwrite(95, 43, (arduboy.audio.enabled() ? sound_on : sound_off), 0);
   
   if (arduboy.justPressed(B_BUTTON)) {
-    
     toggleSoundSettings();
     Sprites::drawOverwrite(95, 43, (arduboy.audio.enabled() ? sound_on : sound_off), 0);
   }
@@ -354,10 +335,8 @@ void introduction() {
   Sprites::drawOverwrite(83, 53, (shouldScreenFlash ? sound_on : sound_off), 0);
   
   if (arduboy.justPressed(RIGHT_BUTTON)) {
-    
     toggleScreenFlash();
     Sprites::drawOverwrite(83, 53, (shouldScreenFlash ? sound_on : sound_off), 0);
-    
   }
   
   if (arduboy.justPressed(A_BUTTON)) {
@@ -392,46 +371,24 @@ void playGame() {
     isPaused = true;
     return;
   }
-  
-  /*--------------------------------------
-  Begin obstacle process
-  --------------------------------------*/
 
   // Don't launch anything until timer is up.
   // This is here so the player isn't caught off guard immediately
-  for (uint8_t i = 0; i < launchTimer; i--) {
-    --launchTimer;
-  }
   
   if (launchTimer > 0) {
-    
-    arduboy.setCursor(30, 10);
-    arduboy.print(F("Avoid sticky"));
-    arduboy.setCursor(30, 20);
-    arduboy.print(F("brain matter"));
-    arduboy.setCursor(30, 30);
-    arduboy.print(F("and press A when"));
-    arduboy.setCursor(30, 40);
-    arduboy.print(F("near synapses!"));
+    --launchTimer;
+    printInstructions();
   }
   
   if (launchTimer == 0) {
-    
-      // Should we launch another obstacle?
     --obstacleLaunchCountdown;
     
     if (obstacleLaunchCountdown == 0) {
-  
       for (uint8_t i = 0; i < numberOfObstacles; i++) {
-  
         if (!matters[i].enabled) { 
-          
           launchObstacle(i);
-          
           break;
-          
         }
-  
       }
   
       obstacleLaunchCountdown = random(obstacleLaunchDelayMin, obstacleLaunchDelayMax);
@@ -442,18 +399,12 @@ void playGame() {
     --synapseLaunchCountdown;
     
     if (synapseLaunchCountdown == 0) {
-    
       // Launch a new synapse if player clicked on current one
       for (uint8_t i = 0; i < numberOfSynapses; i++) {
-        
         if (!targets[i].enabled) {
-          
           launchSynapse(i);
-          
           break;
-          
         }
-        
       }
       
       synapseLaunchCountdown = random(synapseLaunchDelayMin, synapseLaunchDelayMax) + obstacleLaunchCountdown;
@@ -463,20 +414,12 @@ void playGame() {
   
   // Any collisions?
 
-  if (collision()) {
-    
-    // arduboy.setCursor(0, 0);
-    // arduboy.print(F("obstacle"));
-    
-    // gameStatus = GameStatus::GameOver;
-      
+  if (collisionObstacle()) {
       if (player.x > 0) {
         player.x--;
       } else {
         gameStatus = GameStatus::GameOver;
       }
-
-
   }
   
   updateObstacles();
