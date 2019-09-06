@@ -141,12 +141,6 @@ void drawObstacles() {
   for (uint8_t i = 0; i < numberOfObstacles; i++) {
     
     if (matters[i].enabled) {
-
-      if (matters[i].size == Size::Medium) {
-        matters[i].image = matterMedium;
-      } else {
-        matters[i].image = matterSmall;
-      }
       
       Sprites::drawSelfMasked(matters[i].x, matters[i].y, matters[i].image, 0);      
 
@@ -330,6 +324,12 @@ void launchObstacle(uint8_t obstacleNumber) {
   matters[obstacleNumber].y = spawnCoords[index];
   matters[obstacleNumber].size = size;
   matters[obstacleNumber].enabled = true;
+  
+  if (matters[obstacleNumber].size == Size::Medium) {
+    matters[obstacleNumber].image = matterMedium;
+  } else {
+    matters[obstacleNumber].image = matterSmall;
+  }
 
 }
 
