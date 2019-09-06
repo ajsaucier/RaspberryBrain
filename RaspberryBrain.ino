@@ -6,7 +6,7 @@
 #include "game.h"
 
 void setup() {
-  initEEPROM();
+  
   arduboy.begin();
   // for quicker booting when developing
   // arduboy.boot();
