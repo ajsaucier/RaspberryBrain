@@ -9,10 +9,17 @@ constexpr uint8_t tileSize{ 32 };
 constexpr uint8_t borderHeight{ 8 };
 constexpr uint8_t bottomBorderLimit{ HEIGHT - borderHeight };
 constexpr uint8_t playerSize{ 16 };
-constexpr uint8_t numberOfObstacles{ 4 };
+constexpr uint8_t numberOfObstacles{ 4  };
 constexpr uint16_t increaseDifficultyScore { 1000 };
 constexpr uint8_t numberOfSynapses{ 1 };
 constexpr uint8_t synapseSize{ 8 };
+
+// Ground scrolling
+bool moveGround{ true };
+float groundX { 0 };
+
+// Pause
+bool isPaused{ false };
 
 // Scoring
 uint16_t score { 0 };
@@ -33,7 +40,7 @@ uint16_t synapseLaunchDelayMax{ 20 };
 uint16_t synapseLaunchCountdown = synapseLaunchDelayMin;
 
 // Timer to delay first spawn
-uint8_t launchTimer{ 100 };
+uint8_t launchTimer;
 
 // Turning screen flashing on or off
 bool shouldScreenFlash{ true };
@@ -45,7 +52,6 @@ int spawnCoords[16] = {
 
 enum class GameStatus : uint8_t {
   Introduction,
-  Instructions,
   PlayGame,
   GameOver,
 };

@@ -3,13 +3,6 @@
 
 #include "globals.h"
 
-bool moveGround = true;
-float groundX = 0;
-
-void pause() {
-  // pause game with B button
-}
-
 // Add ability to turn on or off beep sounds
 void toggleSoundSettings() {
   
@@ -86,9 +79,11 @@ void initializeGame() {
   player.image = raspberry;
   
   score = 0;
-  launchTimer = 75;
+  launchTimer = 150;
+  isPaused = false;
   
   shouldScreenFlash = EEPROM.get(EEPROM_STORAGE_SPACE_START, shouldScreenFlash);
+  // highScore = EEPROM.get(EEPROM_STORAGE_SPACE_START, highScore);
 }
 
 void drawPlayer() {
@@ -277,6 +272,8 @@ void detectHit() {
         
       }
       
+      score += 10;
+      
     }
   }
 }
@@ -354,8 +351,6 @@ void introduction() {
     Sprites::drawOverwrite(95, 43, (arduboy.audio.enabled() ? sound_on : sound_off), 0);
   }
   
-  // TODO: Add option to toggle screen flash using arrow key
-  
   Sprites::drawOverwrite(83, 53, (shouldScreenFlash ? sound_on : sound_off), 0);
   
   if (arduboy.justPressed(RIGHT_BUTTON)) {
@@ -370,17 +365,33 @@ void introduction() {
   }
 }
 
-void instructions() {
-  
-  // TODO: Add instructions explaining game
-}
-
 void playGame() {
   
   // include all gameplay functions in here
   drawBackground();
   drawPlayer();
   movePlayer();
+  
+  // Pause feature
+  if (isPaused) {
+    arduboy.fillScreen(BLACK);
+    arduboy.setCursor(45, 20);
+    arduboy.print(F("PAUSED"));
+    arduboy.print(F("\n"));
+    arduboy.setCursor(5, 40);
+    arduboy.print(F("Press B to continue."));
+    
+    if (arduboy.justPressed(B_BUTTON)) {
+      isPaused = false;
+    }
+    
+    return;
+  }
+  
+  if (arduboy.justPressed(B_BUTTON)) {
+    isPaused = true;
+    return;
+  }
   
   /*--------------------------------------
   Begin obstacle process
@@ -390,6 +401,18 @@ void playGame() {
   // This is here so the player isn't caught off guard immediately
   for (uint8_t i = 0; i < launchTimer; i--) {
     --launchTimer;
+  }
+  
+  if (launchTimer > 0) {
+    
+    arduboy.setCursor(30, 10);
+    arduboy.print(F("Avoid sticky"));
+    arduboy.setCursor(30, 20);
+    arduboy.print(F("brain matter"));
+    arduboy.setCursor(30, 30);
+    arduboy.print(F("and press A when"));
+    arduboy.setCursor(30, 40);
+    arduboy.print(F("near synapses!"));
   }
   
   if (launchTimer == 0) {
@@ -469,23 +492,29 @@ void playGame() {
 }
 
 void gameOver() {
-  arduboy.setCursor(0, 0);
-  arduboy.print(F("Sorry, you got stuck"));
-  arduboy.print(F("\n"));
-  arduboy.print(F("on some brain matter!"));
+  
+  if (score > highScore) {
+    highScore = score;
+    // EEPROM.put(EEPROM_STORAGE_SPACE_START, highScore);
+  }
+  
+  arduboy.setCursor(35, 10);
+  arduboy.print(F("GAME OVER"));
   
   arduboy.setCursor(0, 30);
   arduboy.print(F("SCORE: "));
+  arduboy.print(score);
   
   arduboy.setCursor(0, 40);
-  arduboy.print(F("HI SCORE: "));
+  arduboy.print(F("HIGH SCORE: "));
+  arduboy.print(highScore);
   
   arduboy.setCursor(0, 50);
-  arduboy.print(F("Press A to start over."));
+  arduboy.print(F("Press B to start over."));
   
   // Show current score and high score on this screen
   
-  if (arduboy.justPressed(A_BUTTON)) {
+  if (arduboy.justPressed(B_BUTTON)) {
     gameStatus = GameStatus::Introduction;
   }
 }
