@@ -27,10 +27,8 @@ void toggleScreenFlash() {
   
   if (shouldScreenFlash) {
     shouldScreenFlash = false;
-    EEPROM.put(EEPROM_STORAGE_SPACE_START, shouldScreenFlash);
   } else {
     shouldScreenFlash = true;
-    EEPROM.put(EEPROM_STORAGE_SPACE_START, shouldScreenFlash);
   }
   
 }
@@ -81,11 +79,15 @@ void initializeGame() {
     targets[i].enabled = false;
   }
   
+  // Place player in the middle of screen vertically
   player.x = 0;
   player.y = (HEIGHT / 2) - (playerSize / 2);
   player.image = raspberry;
   
+  // Scoring
   score = 0;
+  highScore = EEPROM.get(EEPROM_STORAGE_SPACE_START, highScore);
+  
   launchTimer = 75;
   
   shouldScreenFlash = EEPROM.get(EEPROM_STORAGE_SPACE_START, shouldScreenFlash);
@@ -272,10 +274,10 @@ void detectHit() {
       }
       
       if (arduboy.audio.enabled()) {
-        
         sound.tone(NOTE_E5, 50);
-        
       }
+      
+      score += 10;
       
     }
   }
@@ -341,6 +343,8 @@ Game state functions
 ----------------------*/
 
 void introduction() {
+  
+  EEPROM.get(EEPROM_SCORE, highScore);
   
   initializeGame();
   
@@ -469,23 +473,29 @@ void playGame() {
 }
 
 void gameOver() {
-  arduboy.setCursor(0, 0);
-  arduboy.print(F("Sorry, you got stuck"));
-  arduboy.print(F("\n"));
-  arduboy.print(F("on some brain matter!"));
+  
+  if (score > highScore) {
+    highScore = score;
+    EEPROM.put(EEPROM_SCORE, highScore);
+  }
+  
+  arduboy.setCursor(35, 10);
+  arduboy.print(F("GAME OVER"));
   
   arduboy.setCursor(0, 30);
   arduboy.print(F("SCORE: "));
+  arduboy.print(score);
   
   arduboy.setCursor(0, 40);
-  arduboy.print(F("HI SCORE: "));
+  arduboy.print(F("HIGH SCORE: "));
+  arduboy.print(highScore);
   
   arduboy.setCursor(0, 50);
-  arduboy.print(F("Press A to start over."));
+  arduboy.print(F("Press B to start over."));
   
   // Show current score and high score on this screen
   
-  if (arduboy.justPressed(A_BUTTON)) {
+  if (arduboy.justPressed(B_BUTTON)) {
     gameStatus = GameStatus::Introduction;
   }
 }
