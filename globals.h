@@ -9,10 +9,11 @@ constexpr uint8_t tileSize{ 32 };
 constexpr uint8_t borderHeight{ 8 };
 constexpr uint8_t bottomBorderLimit{ HEIGHT - borderHeight };
 constexpr uint8_t playerSize{ 16 };
-constexpr uint8_t numberOfObstacles{ 4  };
+constexpr uint8_t numberOfMatters{ 4  };
 constexpr uint16_t increaseDifficultyScore { 1000 };
 constexpr uint8_t numberOfSynapses{ 1 };
 constexpr uint8_t synapseSize{ 8 };
+constexpr uint16_t saveDataAddress{ (EEPROM_STORAGE_SPACE_START + 168) };
 
 // Ground scrolling
 bool moveGround{ true };
@@ -23,22 +24,21 @@ bool isPaused{ false };
 
 // Scoring
 uint16_t score { 0 };
-uint16_t highScore { 0 };
 
 // Set everything being saved to EEPROM
-// struct SaveData {
-//   bool shouldScreenFlash;
-//   uint16_t highScore;
-// };
+struct SaveData {
+  bool shouldScreenFlash;
+  uint16_t highScore;
+};
 
-// SavaData saveData = {true, 0}; 
+SaveData saveData;
 
-// Timing of random obstacle spawning
-uint8_t obstacleLaunchDelayMin{ 30 };
-uint16_t obstacleLaunchDelayMax{ 70 };
+// Timing of random matter spawning
+uint8_t matterLaunchDelayMin{ 30 };
+uint16_t matterLaunchDelayMax{ 70 };
 
-// Timer for launching obstacles
-uint16_t obstacleLaunchCountdown = obstacleLaunchDelayMin;
+// Timer for launching matters
+uint16_t matterLaunchCountdown = matterLaunchDelayMin;
 
 // Timing of synapse spawning
 uint8_t synapseLaunchDelayMin{ 20 };
@@ -50,10 +50,7 @@ uint16_t synapseLaunchCountdown = synapseLaunchDelayMin;
 // Timer to delay first spawn
 uint8_t launchTimer;
 
-// Turning screen flashing on or off
-bool shouldScreenFlash{ true };
-
-// Lookup table for spawning medium obstacles
+// Lookup table for spawning medium matters
 int spawnCoords[16] = {
   8, 9, 10, 11, 12, 13, 14, 32, 33, 34, 35, 36, 37, 38, 39, 40
 };
@@ -89,8 +86,8 @@ struct Matter {
   const uint8_t *image;
 };
 
-// create matter obstacles
-Matter matters[numberOfObstacles] = {
+// create matter matters
+Matter matters[numberOfMatters] = {
   {0, 8, Size::Small, false, matterSmall},
   {0, 8, Size::Small, false, matterSmall},
   {0, 8, Size::Small, false, matterSmall},
@@ -105,7 +102,7 @@ struct Synapse {
   const uint8_t *image;
 };
 
-Synapse targets[numberOfSynapses] = {
+Synapse synapses[numberOfSynapses] = {
   {100, (HEIGHT / 2) - (synapseSize / 2), false, false, synapse}
 };
 
