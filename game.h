@@ -74,7 +74,7 @@ void initializeGame() {
   player.image = raspberry;
   
   score = 0;
-  launchTimer = 150;
+  launchTimer = 200;
   isPaused = false;
   
   saveData.shouldScreenFlash = EEPROM.get(saveDataAddress, saveData.shouldScreenFlash);
@@ -82,14 +82,16 @@ void initializeGame() {
 }
 
 void printInstructions() {
-  arduboy.setCursor(30, 10);
+  arduboy.setCursor(26, 8);
   arduboy.print(F("Avoid sticky"));
-  arduboy.setCursor(30, 20);
+  arduboy.setCursor(26, 18);
   arduboy.print(F("brain matter"));
-  arduboy.setCursor(30, 30);
+  arduboy.setCursor(26, 28);
   arduboy.print(F("and press A when"));
-  arduboy.setCursor(30, 40);
+  arduboy.setCursor(26, 38);
   arduboy.print(F("near synapses!"));
+  arduboy.setCursor(26, 48);
+  arduboy.print(F("Press B to pause."));
 }
 
 void drawPlayer() {
