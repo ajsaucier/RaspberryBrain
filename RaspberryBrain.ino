@@ -16,11 +16,13 @@ void setup() {
 
   // initialize things here
   arduboy.initRandomSeed();
+  
+  initialiseEEPROM();
 
 }
 
 void loop() {
-  if (!(arduboy.nextFrame()))
+  if (!arduboy.nextFrame())
     return;
 
   arduboy.clear();

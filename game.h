@@ -22,7 +22,7 @@ void toggleScreenFlash() {
   } else {
     saveData.shouldScreenFlash = true;
   }
-  EEPROM.put(saveDataAddress, saveData);
+  saveEEPROM();
 }
 
 void drawBackground() {
@@ -59,7 +59,7 @@ void drawBackground() {
 // 
 // Reset everything for a new game
 // 
-void initializeGame() {
+void resetGame() {
 
   for (uint8_t i = 0; i < numberOfMatters; ++i) {
     matters[i].enabled = false;
@@ -77,8 +77,7 @@ void initializeGame() {
   launchTimer = 200;
   isPaused = false;
   
-  saveData.shouldScreenFlash = EEPROM.get(saveDataAddress, saveData.shouldScreenFlash);
-  saveData.highScore = EEPROM.get(saveDataAddress, saveData.highScore);
+  loadEEPROM();
 }
 
 void printInstructions() {
@@ -323,7 +322,10 @@ void launchMatter(uint8_t matterNumber) {
 
 void introduction() {
   
-  initializeGame();
+  loadEEPROM();
+  arduboy.clear();
+  
+  resetGame();
   
   Sprites::drawOverwrite(0, 0, intro, 0);
   
@@ -440,7 +442,7 @@ void gameOver() {
   
   if (score > saveData.highScore) {
     saveData.highScore = score;
-    EEPROM.put(saveDataAddress, saveData);
+    saveEEPROM();
   }
   
   arduboy.setCursor(35, 10);
