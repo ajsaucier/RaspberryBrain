@@ -300,7 +300,7 @@ void launchMatter(uint8_t matterNumber) {
   Size size = static_cast<Size>(randomObstacle);
   
   // random number from spawnCoords[] lookup table
-  int index = random() % (sizeof spawnCoords / sizeof *spawnCoords);
+  int index = (random() % getSize(spawnCoords));
   
   // launch matter
   matters[matterNumber].x = WIDTH - 1;
@@ -389,9 +389,7 @@ void playGame() {
           break;
         }
       }
-  
       matterLaunchCountdown = random(matterLaunchDelayMin, matterLaunchDelayMax);
-              
     }
     
     // Should we launch another target (synapse)?
@@ -405,9 +403,7 @@ void playGame() {
           break;
         }
       }
-      
       synapseLaunchCountdown = random(synapseLaunchDelayMin, synapseLaunchDelayMax) + matterLaunchCountdown;
-      
     }
   }
   
@@ -422,15 +418,10 @@ void playGame() {
   }
   
   updateMatters();
-  
   drawMatters();
-  
   updateSynapses();
-  
   drawSynapses();
-  
   detectHit();
-  
 }
 
 void gameOver() {

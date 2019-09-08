@@ -2,6 +2,7 @@
 #define GLOBAL_H
 
 Arduboy2 arduboy;
+#include "Size.h"
 #include <ArduboyTones.h>
 ArduboyTones sound(arduboy.audio.enabled);
 
@@ -25,7 +26,7 @@ constexpr uint16_t dataAddress = (byte2Address + sizeof(uint8_t));
 constexpr uint8_t checkByte1 = 'R';
 constexpr uint8_t checkByte2 = 'B';
 
-// Set everything being saved to EEPROM
+// Set everything being saved to EEPROM - credit goes to Pharap and filmote
 struct SaveData {
   bool shouldScreenFlash;
   uint16_t highScore;
