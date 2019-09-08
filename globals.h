@@ -32,14 +32,14 @@ struct SaveData {
   uint16_t highScore;
 };
 
-SaveData saveData { true, 0 };
+SaveData saveData { false, 0 };
 
 void clearEEPROM()
 {
   EEPROM.update(byte1Address, checkByte1);
   EEPROM.update(byte2Address, checkByte2);
 
-  SaveData blankSaveData { true, 0 };
+  SaveData blankSaveData { false, 0 };
   EEPROM.put(dataAddress, blankSaveData);
 }
 
@@ -103,7 +103,7 @@ enum class GameStatus : uint8_t {
   GameOver,
 };
 
-GameStatus gameStatus {GameStatus::Introduction}; // for production
+GameStatus gameStatus {GameStatus::Reset}; // for production
 // GameStatus gameStatus {GameStatus::PlayGame}; // for testing
 
 enum class Size : uint8_t {

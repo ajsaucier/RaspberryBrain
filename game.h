@@ -35,7 +35,7 @@ void drawBackground() {
       groundX = 0;
     }
   
-    groundX++;
+    ++groundX;
     
     // Background design might be too overwhelming
     // for (uint8_t x = 0; x < 5; x++) {
@@ -60,6 +60,8 @@ void drawBackground() {
 // Reset everything for a new game
 // 
 void resetGame() {
+    
+  loadEEPROM();
 
   for (uint8_t i = 0; i < numberOfMatters; ++i) {
     matters[i].enabled = false;
@@ -76,8 +78,6 @@ void resetGame() {
   score = 0;
   launchTimer = 200;
   isPaused = false;
-  
-  loadEEPROM();
 }
 
 void printInstructions() {
