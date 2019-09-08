@@ -31,6 +31,10 @@ void loop() {
 
   switch (gameStatus) {
 
+    case GameStatus::Reset:
+      resetGame();
+      gameStatus = GameStatus::Introduction;
+    
     case GameStatus::Introduction:
       introduction();
       break;

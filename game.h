@@ -44,11 +44,11 @@ void drawBackground() {
     //   }
     // }
     
-    for (uint8_t x = 0; x < 5; x++) {
+    for (uint8_t x = 0; x < 5; ++x) {
       Sprites::drawSelfMasked((x * tileSize) - groundX,  0, borderTop, 0);
     }
     
-    for (uint8_t x = 0; x < 5; x++) {
+    for (uint8_t x = 0; x < 5; ++x) {
       Sprites::drawSelfMasked((x * tileSize) - groundX,  HEIGHT - borderHeight, borderBottom, 0);
     }
       
@@ -100,7 +100,7 @@ void drawPlayer() {
 void updateSynapses() {
   for (uint8_t i = 0; i < numberOfSynapses; ++i) {
     if (synapses[i].enabled) {
-      synapses[i].x--;
+      --synapses[i].x;
       
       // If synapse goes off the left of screen or gets clicked on, reset it
       if (synapses[i].x < -getImageWidth(synapses[i].image) || synapses[i].hit) {
@@ -174,32 +174,32 @@ bool collisionMatter() { // Built-in method
         
   for (uint8_t i = 0; i < numberOfMatters; ++i) {
 
-    if (matters[i].enabled) {
+    if (!matters[i].enabled)
+      continue;
 
-      Rect playerRect 
-      {
-        player.x, 
-        player.y,
-        getImageWidth(player.image),
-        getImageHeight(player.image) 
-      };
-                            
-      // arduboy.drawRect(playerRect.x, playerRect.y, playerRect.width, playerRect.height );
-                            
-                                    
-      Rect matterRect
-      { 
-        matters[i].x, 
-        matters[i].y,
-        getImageWidth(matters[i].image), 
-        getImageHeight(matters[i].image) 
-      };
-                        
-      // arduboy.drawRect(obsRect.x, obsRect.y, obsRect.width, obsRect.height );
+    Rect playerRect 
+    {
+      player.x, 
+      player.y,
+      getImageWidth(player.image),
+      getImageHeight(player.image) 
+    };
+                          
+    // arduboy.drawRect(playerRect.x, playerRect.y, playerRect.width, playerRect.height );
+                          
+                                  
+    Rect matterRect
+    { 
+      matters[i].x, 
+      matters[i].y,
+      getImageWidth(matters[i].image), 
+      getImageHeight(matters[i].image) 
+    };
+                      
+    // arduboy.drawRect(obsRect.x, obsRect.y, obsRect.width, obsRect.height );
 
-      if (arduboy.collide(playerRect, matterRect)) {
-        return true;
-      }
+    if (arduboy.collide(playerRect, matterRect)) {
+      return true;
     }
   }
   return false;
@@ -211,27 +211,27 @@ bool collisionSynapse() {
   
   for (uint8_t i = 0; i < numberOfSynapses; ++i) {
     
-    if (synapses[i].enabled) {
+    if (!synapses[i].enabled)
+      continue;
       
-      Rect playerRect
-      { 
-        player.x, 
-        player.y,
-        getImageWidth(player.image),
-        getImageHeight(player.image) 
-      };
-                            
-      Rect synapseRect 
-      { 
-        synapses[i].x, 
-        synapses[i].y,
-        getImageWidth(synapses[i].image), 
-        getImageHeight(synapses[i].image) 
-      };
+    Rect playerRect
+    { 
+      player.x, 
+      player.y,
+      getImageWidth(player.image),
+      getImageHeight(player.image) 
+    };
+                          
+    Rect synapseRect 
+    { 
+      synapses[i].x, 
+      synapses[i].y,
+      getImageWidth(synapses[i].image), 
+      getImageHeight(synapses[i].image) 
+    };
 
-      if (arduboy.collide(playerRect, synapseRect)) {
-        return true;
-      }
+    if (arduboy.collide(playerRect, synapseRect)) {
+      return true;
     }
   }
   return false;
@@ -240,7 +240,7 @@ bool collisionSynapse() {
 void detectHit() {
   
   for (uint8_t i = 0; i < numberOfSynapses; ++i) {
-    if (collisionSynapse() && arduboy.justPressed(A_BUTTON)) {
+    if (arduboy.justPressed(A_BUTTON) && collisionSynapse()) {
       synapses[i].hit = true;
       
       if (saveData.shouldScreenFlash) {
@@ -263,22 +263,22 @@ void movePlayer() {
   
   // move left
   if (arduboy.pressed(LEFT_BUTTON) && player.x > 0 && !collisionMatter()) {
-    player.x--;
+    --player.x;
   }
   
   // move right if not hitting an matter
   if (arduboy.pressed(RIGHT_BUTTON) && player.x < 100 && !collisionMatter()) {
-    player.x++;
+    ++player.x;
   }
   
   // move up
   if (arduboy.pressed(UP_BUTTON) && player.y > borderHeight) {
-    player.y--;
+    --player.y;
   }
   
   // move down
   if (arduboy.pressed(DOWN_BUTTON) && player.y < (bottomBorderLimit - playerSize)) {
-    player.y++;
+    ++player.y;
   }
 }
 
@@ -321,11 +321,6 @@ void launchMatter(uint8_t matterNumber) {
 // 
 
 void introduction() {
-  
-  loadEEPROM();
-  arduboy.clear();
-  
-  resetGame();
   
   Sprites::drawOverwrite(0, 0, intro, 0);
   
@@ -462,7 +457,7 @@ void gameOver() {
   // Show current score and high score on this screen
   
   if (arduboy.justPressed(B_BUTTON)) {
-    gameStatus = GameStatus::Introduction;
+    gameStatus = GameStatus::Reset;
   }
 }
 

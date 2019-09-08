@@ -88,7 +88,7 @@ uint16_t synapseLaunchDelayMax{ 20 };
 uint16_t synapseLaunchCountdown = synapseLaunchDelayMin;
 
 // Timer to delay first spawn
-uint8_t launchTimer;
+uint8_t launchTimer{ 200 };
 
 // Lookup table for spawning medium matters
 int spawnCoords[16] = {
@@ -96,6 +96,7 @@ int spawnCoords[16] = {
 };
 
 enum class GameStatus : uint8_t {
+  Reset,
   Introduction,
   PlayGame,
   GameOver,
