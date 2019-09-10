@@ -10,10 +10,13 @@ constexpr uint8_t tileSize{ 32 };
 constexpr uint8_t borderHeight{ 8 };
 constexpr uint8_t bottomBorderLimit{ HEIGHT - borderHeight };
 constexpr uint8_t playerSize{ 16 };
-constexpr uint8_t numberOfMatters{ 4  };
+constexpr uint8_t numberOfMatters{ 4 };
 constexpr uint16_t increaseDifficultyScore { 1000 };
 constexpr uint8_t numberOfSynapses{ 1 };
 constexpr uint8_t synapseSize{ 8 };
+constexpr uint8_t synapseMissesAllowed{ 3 };
+
+uint8_t synapseMisses{ 0 };
 
 constexpr uint16_t saveOffset = 164;
 constexpr uint16_t startAddress = (EEPROM_STORAGE_SPACE_START + saveOffset);

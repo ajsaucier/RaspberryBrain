@@ -78,6 +78,7 @@ void resetGame() {
   score = 0;
   launchTimer = 200;
   isPaused = false;
+  synapseMisses = 0;
 }
 
 void printInstructions() {
@@ -91,6 +92,19 @@ void printInstructions() {
   arduboy.print(F("near synapses!"));
   arduboy.setCursor(26, 48);
   arduboy.print(F("Press B to pause."));
+}
+
+void showMisses() {
+  if (!launchTimer) {
+    arduboy.fillRect(0, 0, 16, 8, BLACK);
+    arduboy.setCursor(0, 0);
+    arduboy.print(F("Misses: "));
+    if (synapseMisses <= synapseMissesAllowed) {
+      arduboy.print(synapseMisses);
+    } else {
+      arduboy.print(synapseMissesAllowed);
+    }
+  }
 }
 
 void drawPlayer() {
@@ -108,7 +122,10 @@ void updateSynapses() {
       }
       
       if(synapses[i].x < -getImageWidth(synapses[i].image) && !synapses[i].hit) {
-        gameStatus = GameStatus::GameOver;
+        ++synapseMisses;
+        if (synapseMisses > synapseMissesAllowed) {
+          gameStatus = GameStatus::GameOver;
+        }
       }
     }
   }
@@ -196,7 +213,7 @@ bool collisionMatter() { // Built-in method
       getImageHeight(matters[i].image) 
     };
                       
-    // arduboy.drawRect(obsRect.x, obsRect.y, obsRect.width, obsRect.height );
+    // arduboy.drawRect(matterRect.x, matterRect.y, matterRect.width, matterRect.height );
 
     if (arduboy.collide(playerRect, matterRect)) {
       return true;
@@ -422,6 +439,7 @@ void playGame() {
   updateSynapses();
   drawSynapses();
   detectHit();
+  showMisses();
 }
 
 void gameOver() {
@@ -433,6 +451,14 @@ void gameOver() {
   
   arduboy.setCursor(35, 10);
   arduboy.print(F("GAME OVER"));
+  
+  arduboy.setCursor(0, 20);
+  
+  if (synapseMisses > synapseMissesAllowed) {
+    arduboy.print(F("Missed 3 synapses!"));
+  } else {
+    arduboy.print(F("You got stuck!"));
+  }
   
   arduboy.setCursor(0, 30);
   arduboy.print(F("SCORE: "));
