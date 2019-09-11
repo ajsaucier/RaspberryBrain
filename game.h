@@ -123,7 +123,7 @@ void updateSynapses() {
       
       if(synapses[i].x < -getImageWidth(synapses[i].image) && !synapses[i].hit) {
         ++synapseMisses;
-        if (synapseMisses > synapseMissesAllowed) {
+        if (synapseMisses == synapseMissesAllowed) {
           gameStatus = GameStatus::GameOver;
         }
       }
@@ -454,7 +454,7 @@ void gameOver() {
   
   arduboy.setCursor(0, 20);
   
-  if (synapseMisses > synapseMissesAllowed) {
+  if (synapseMisses == synapseMissesAllowed) {
     arduboy.print(F("Missed 3 synapses!"));
   } else {
     arduboy.print(F("You got stuck!"));
